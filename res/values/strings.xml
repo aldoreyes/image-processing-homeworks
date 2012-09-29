@@ -1,0 +1,38 @@
+<resources>
+
+    <string name="app_name">ImageProcessing</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">Home</string>
+    <string name="count">Count</string>
+    <string name="neighbors">Neighbors</string>
+    <string name="border">Border</string>
+    <string name="reset">Reset</string>
+	<string-array name="hw1_ex2_images">
+        <item>Image 1</item>
+        <item>Image 2</item>
+    </string-array>
+    <string-array name="hw1_ex3_images">
+        <item>Select An Image</item>
+        <item>Binary Image 1</item>
+        <item>Binary Image 2</item>
+        <item>Choose file...</item>
+    </string-array>
+    <string-array name="hw1_ex4_images">
+        <item>Binary Image 1</item>
+        <item>Binary Image 2</item>
+    </string-array>
+    <string-array name="image_type">
+        <item>None</item>
+        <item>Only single connected</item>
+        <item>Only multi connected</item>
+        <item>Contains single and multi connected</item>
+    </string-array>
+        <string name="original">Original</string>
+        <string name="erosion">Erosion</string>
+        <string name="dilation">Dilation</string>
+        <string name="choose_file">Choose File...</string>
+        <string name="otsu">Otsu</string>
+        <string name="kittler">Kittler</string>
+        <string name="sahoo">Sahoo</string>
+</resources>

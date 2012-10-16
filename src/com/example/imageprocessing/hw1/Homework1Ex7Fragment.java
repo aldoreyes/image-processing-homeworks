@@ -1,5 +1,6 @@
 package com.example.imageprocessing.hw1;
 
+import java.util.Set;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -104,10 +105,14 @@ public class Homework1Ex7Fragment extends SherlockFragment implements
 	}
 	
 	private IIntegerResult segmentationHandler = new IIntegerResult() {
-		
+
 		@Override
-		public void onResult(int result) {
+		public void onResult(int result, Bitmap tagBM,
+				Set<Integer> eqTable) {
 			((TextView)getView().findViewById(R.id.textView1)).setText("Segments: "+ result);
+			//ImageView iv = ((ImageView) getView().findViewById(R.id.image2));
+			//iv.setImageBitmap(tagBM);
+			//iv.invalidate();
 		}
 	}; 
 }

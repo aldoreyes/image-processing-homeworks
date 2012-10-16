@@ -116,7 +116,7 @@ public class BitmapUtils {
 		threshold = (int) Math.floor(sum / tot);
 		return threshold;
 	}
-	
+
 	public static int countSE(Bitmap bitmap, int[][] se) {
 		int hlen = bitmap.getWidth(), vlen = bitmap.getHeight();
 		int toReturn = 0;
@@ -131,13 +131,15 @@ public class BitmapUtils {
 		return toReturn;
 	}
 
-	public static int dilate(Bitmap bitmap, int[][] se) {
-		int hlen = bitmap.getWidth(), vlen = bitmap.getHeight();
+	public static int dilate(Bitmap source, Bitmap target, int[][] se) {
+		int hlen = source.getWidth(), vlen = source.getHeight(), offsetX = (int) -Math
+				.floor(se[0].length / 2), offsetY = (int) -Math
+				.floor(se.length / 2);
 		int toReturn = 0;
-		for (int i = vlen - 1; i >= 0; i--) {
-			for (int j = hlen - 1; j >= 0; j--) {
-				if ((bitmap.getPixel(j, i) & 0xff) > 0) {
-					kernelDilate(j, i, hlen, vlen, bitmap, se);
+		for (int i = 0; i < vlen; i++) {
+			for (int j = 0; j < hlen; j++) {
+				if ((source.getPixel(j, i) & 0xff) > 0) {
+					kernelDilate(j, i, hlen, vlen, target, se, offsetX, offsetY);
 					toReturn++;
 				}
 			}
@@ -146,13 +148,14 @@ public class BitmapUtils {
 		return toReturn;
 	}
 
-	private static void kernelDilate(int x, int y, int w, int h, Bitmap bitmap,
-			int[][] se) {
-		int lenh = se[0].length, lenv = se.length;
+	private static void kernelDilate(int x, int y, int w, int h, Bitmap target,
+			int[][] se, int offsetX, int offsetY) {
+		int lenh = se[0].length, lenv = se.length, xPos, yPos;
 		for (int i = 0; i < lenv; i++) {
 			for (int j = 0; j < lenh; j++) {
-				if (i + y < h && j + x < w && se[i][j] == 1) {
-					bitmap.setPixel(x + j, y + i, 0xffffffff);
+				if ((yPos = i + y + offsetY) > 0 && (xPos = x + j + offsetX) > 0 && yPos < h && xPos < w
+						&& se[i][j] == 1) {
+					target.setPixel(xPos, yPos, 0xffffffff);
 				}
 			}
 		}
@@ -198,25 +201,33 @@ public class BitmapUtils {
 
 		return toReturn;
 	}
-	
-	public static int getContactCount(Bitmap bitmap){
+
+	public static int getContactCount(Bitmap bitmap) {
 		int toReturn = 0;
 		int hlen = bitmap.getWidth(), vlen = bitmap.getHeight();
 		for (int i = 0; i < vlen; i++) {
 			for (int j = 0; j < hlen; j++) {
-			 if((bitmap.getPixel(j, i) & 0xff) > 0){
-				 //check  right border
-				 if(j+1 < hlen && (bitmap.getPixel(j+1,i) & 0xff) > 0){
-					 toReturn++;
-				 }
-				//check  bottom border
-				 if(i+1 < vlen && (bitmap.getPixel(j,i+1) & 0xff) > 0){
-					 toReturn++;
-				 }
-			 }
+				if ((bitmap.getPixel(j, i) & 0xff) > 0) {
+					// check right border
+					if (j + 1 < hlen && (bitmap.getPixel(j + 1, i) & 0xff) > 0) {
+						toReturn++;
+					}
+					// check bottom border
+					if (i + 1 < vlen && (bitmap.getPixel(j, i + 1) & 0xff) > 0) {
+						toReturn++;
+					}
+				}
 			}
 		}
-		
+
 		return toReturn;
+	}
+	
+	public static void drawCross(Bitmap bm, int x, int y){
+		Canvas c = new Canvas(bm);
+		Paint p = new Paint();
+		p.setColor(0xffff0000);
+		c.drawLine(x-4, y, x+4, y, p);
+		c.drawLine(x, y-4, x, y+4, p);
 	}
 }

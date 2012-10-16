@@ -1,4 +1,4 @@
-package com.example.imageprocessing;
+package com.example.imageprocessing.hw2;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -9,10 +9,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
-import com.example.imageprocessing.hw1.HW1ListFragment;
-import com.example.imageprocessing.hw2.HW2ListFragment;
+import com.example.imageprocessing.IIPNavigation;
+import com.example.imageprocessing.R;
+import com.example.imageprocessing.R.layout;
 
-public class MainListFragment extends SherlockListFragment {
+public class HW2ListFragment extends SherlockListFragment {
+
 	private IIPNavigation mListener;
 
 	@Override
@@ -31,20 +33,24 @@ public class MainListFragment extends SherlockListFragment {
 
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
 				getSherlockActivity(), android.R.layout.simple_list_item_1,
-				android.R.id.text1, new String[] { "Homework 1", "Homework 2"});
+				android.R.id.text1, new String[] { "HW2 - Ex 1"});
 		setListAdapter(adapter);
 		return toReturn;
 	}
-	
+
+	@Override
+	public void onDetach() {
+		mListener = null;
+		super.onDetach();
+	}
+
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		switch (position) {
 		case 0:
-			mListener.gotoFragment(HW1ListFragment.class);			
-			break;
-		case 1:
-			mListener.gotoFragment(HW2ListFragment.class);			
+			mListener.gotoFragment(Homework2Ex1_a.class);
 			break;
 		}
 	}
+
 }

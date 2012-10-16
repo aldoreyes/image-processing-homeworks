@@ -97,21 +97,26 @@ public class Homework1Ex8Fragment extends SherlockFragment implements
 
 	@Override
 	public void onResult(Bitmap bitmap) {
-		ImageView iv = ((ImageView) getView().findViewById(R.id.image2));
-		iv.setImageBitmap(bitmap);
-		iv.invalidate();
+		
+		
 		
 		int[][] se = new int[][]{
 				{1,1},
 				{1,1}
 		};
 		
+		Bitmap bmFinal = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
+		
 		BitmapUtils.erosion(bitmap, se);
-		int m = BitmapUtils.dilate(bitmap, se);
+		int m = BitmapUtils.dilate(bitmap, bmFinal, se);
 		//int m = BitmapUtils.countSE(bitmap, se);
 		
-		int c = BitmapUtils.getPixelsCount(bitmap);
-		int pc = BitmapUtils.getContactCount(bitmap);
+		int c = BitmapUtils.getPixelsCount(bmFinal);
+		int pc = BitmapUtils.getContactCount(bmFinal);
+		
+		ImageView iv = ((ImageView) getView().findViewById(R.id.image2));
+		iv.setImageBitmap(bmFinal);
+		iv.invalidate();
 		
 		int r = c + m -pc;
 		

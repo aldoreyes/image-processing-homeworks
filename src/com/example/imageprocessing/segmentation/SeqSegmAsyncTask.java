@@ -1,29 +1,53 @@
 package com.example.imageprocessing.segmentation;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import com.example.imageprocessing.util.BitmapUtils;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.os.AsyncTask;
+import android.util.Log;
 
 public class SeqSegmAsyncTask extends AsyncTask<Bitmap, Void, Integer> {
 	
+	private static final int[] colors = new int[]{
+		0xffffffff,
+		0xffffff00,
+		0xff00ffff,
+		0xffff00ff,
+		0xff330000,
+		0xff003300,
+		0xff000055,
+		0xff550000,
+		0xff005500,
+		0xff000099,
+		0xff990000,
+		0xff009900,
+		0xff0000CC,
+		0xffCC0000,
+		0xff00CC00,
+		0xff0000ff,
+		0xffff0000,
+		0xff00ff00
+	};
+	
 	private WeakReference<IIntegerResult> mHandler;
-
+	private Bitmap mTaggedBM;
+	private Set<Integer> mEqTable;
 
 
 	public SeqSegmAsyncTask(IIntegerResult handler) {
 		mHandler = new WeakReference<IIntegerResult>(handler);
 	}
 
-	private HashMap<Integer, ArrayList<Integer>> getEqTable(Bitmap data){
-		HashMap<Integer, ArrayList<Integer>> table = new HashMap<Integer, ArrayList<Integer>>(); 
+	private Set<Integer> getEqTable(Bitmap data){
+		TreeMap<Integer,Integer> labels = new TreeMap<Integer, Integer>(); 
 		int lenh = data.getWidth(), lenv = data.getHeight();
 		int currentTag = 0;
 		int prevTop, prevLeft;
@@ -43,7 +67,7 @@ public class SeqSegmAsyncTask extends AsyncTask<Bitmap, Void, Integer> {
 								}else{
 									data.setPixel(x, y, 0xff000000 + (min = Math.min(prevLeft, prevTop)));
 									//add equivalence
-									table.get(min).add(Math.max(prevLeft, prevTop));
+									union(labels, prevLeft, prevTop);
 								}
 							}else{
 								//prevTop > 0
@@ -57,26 +81,66 @@ public class SeqSegmAsyncTask extends AsyncTask<Bitmap, Void, Integer> {
 					}else{
 						currentTag++;
 						data.setPixel(x, y, 0xff000000 + currentTag);
-						table.put(currentTag, new ArrayList<Integer>());
+						labels.put(currentTag, currentTag);
 					}
 				}
 			}
 		}
 		
-		//filter table
-		HashMap<Integer, ArrayList<Integer>> filteredTable = (HashMap<Integer, ArrayList<Integer>>) table.clone();
-		Iterator<Integer> iterator = table.keySet().iterator();
-		ArrayList<Integer> links;
+		consolidateTags(labels, data);
+		
+		//filter labels
+		Iterator<Integer> iterator = labels.keySet().iterator();
+		Set<Integer> filteredLabels = new TreeSet<Integer>();
 		while(iterator.hasNext()){
-			links = table.get(iterator.next());
-			Iterator<Integer> linksIterator = links.iterator();
-			while(linksIterator.hasNext()){
-				filteredTable.remove(linksIterator.next());
+			int i = iterator.next();
+			if(i == labels.get(i)){
+				filteredLabels.add(i);
 			}
 		}
-		return filteredTable;
+		
+		return filteredLabels;
 	}
 	
+	private void union(Map<Integer, Integer> labels, int a, int b){
+		if( a > b ) { 
+			union(labels, b, a ); return; 
+		} 
+		if( ( a == b ) || ( labels.get(b) == a ) ) 
+			return; 
+			
+		if( labels.get(b) == b ) { 
+			labels.put(b, a); 
+		}else{ 
+			union(labels, labels.get(b) , a ); 
+		
+			if (labels.get(b) > a) { 
+				//***rbf new 
+				labels.put(b, a);
+			} 
+		} 
+	}
+	
+	private int find(Map<Integer, Integer> labels, int a){
+		if( labels.get(a) == a ){ 
+			return a; 
+		} else { 
+			return find(labels, labels.get(a) ); 
+		} 
+	}
+	
+	private void consolidateTags(Map<Integer, Integer> labels, Bitmap data){
+		int lenh = data.getWidth(), lenv = data.getHeight(), pixel;
+		for (int y = 0; y < lenv; y++) {
+			for (int x = 0; x < lenh; x++) {
+				if((pixel = data.getPixel(x, y) & 0xffffff) > 0){
+					//int i = find(labels, labels.get(pixel)) % colors.length;
+					//data.setPixel(x, y, colors[i]);
+					data.setPixel(x, y, 0xff000000 + find(labels, labels.get(pixel)));
+				}
+			}
+		}
+	}
 	
 	
 	@Override
@@ -90,21 +154,27 @@ public class SeqSegmAsyncTask extends AsyncTask<Bitmap, Void, Integer> {
 		};
 		
 		int[][] se = new int[][]{
-				{1,1,1},
-				{1,1,1},
-				{1,1,1}
+				{1,1,1,1},
+				{1,1,1,1},
+				{1,1,1,1},
+				{1,1,1,1}
 		};
-		//BitmapUtils.erosion(bitmap, seErosion);
-		BitmapUtils.dilate(bitmap, se);
 		
-		return getEqTable(bitmap.copy(bitmap.getConfig(), true)).size();
+		Bitmap morphBitmap = bitmap.copy(bitmap.getConfig(), true);
+		//Canvas c = new Canvas();
+		//c.drawColor(0);
+		//BitmapUtils.erosion(morphBitmap, seErosion);
+		BitmapUtils.dilate(morphBitmap, bitmap, se);
+		mTaggedBM = bitmap.copy(bitmap.getConfig(), true);
+		mEqTable = getEqTable(mTaggedBM);
+		return mEqTable.size();
 	}
 	
 	@Override
 	protected void onPostExecute(Integer result) {
 		super.onPostExecute(result);
 		if(mHandler.get() != null){
-			mHandler.get().onResult(result);
+			mHandler.get().onResult(result, mTaggedBM, mEqTable);
 		}
 	}
 

@@ -35,4 +35,5 @@
         <string name="otsu">Otsu</string>
         <string name="kittler">Kittler</string>
         <string name="sahoo">Sahoo</string>
+        <string name="run_neural_network">Run Spiking Neural Network</string>
 </resources>

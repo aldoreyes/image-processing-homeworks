@@ -17,5 +17,25 @@ public class ArrayUtils {
 		return counter;
 	}
 	
+	public static double dotProd(double[] a, double[] b){
+		if(a.length != b.length){
+			throw new IllegalArgumentException("The dimensions have to be equal!");
+		}
+		double sum = 0;
+		for(int i = 0; i < a.length; i++){
+			sum += a[i] * b[i];
+		}
+		return sum;
+	}
+	
+	public static double average(double[] a){
+		double sum = 0;
+		for (int i = 0; i < a.length; i++) {
+			sum+= a[i];
+		}
+		
+		return sum/a.length;
+	}
+	
 	
 }
